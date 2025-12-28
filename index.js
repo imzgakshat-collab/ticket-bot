@@ -62,15 +62,15 @@ client.on("interactionCreate", async (interaction) => {
 
     "━━━━━━━━━━━━━━━━━━\n" +
     "**<:purchase:1454767621823270946>  Purchasing**\n" +
-    "🟢 Use this category if you want to **buy something**, ask about **pricing**, or need help **before purchasing**.\n\n" +
+    "- Use this category if you want to **buy something**, ask about **pricing**, or need help **before purchasing**.\n\n" +
 
     "━━━━━━━━━━━━━━━━━━\n" +
     "**<a:claiming:1454767248576090203>  Claiming**\n" +
-    "🟡 Use this category if you **won a giveaway or event** and want to **claim your prize**.\n\n" +
+    "- Use this category if you **won a giveaway or event** and want to **claim your prize**.\n\n" +
 
     "━━━━━━━━━━━━━━━━━━\n" +
     "**<a:CustomerSupport:1454767471402684478>  Support**\n" +
-    "🔵 Use this category if you have **questions**, **doubts**, or need help with **features or services**.\n\n" +
+    "- Use this category if you have **questions**, **doubts**, or need help with **features or services**.\n\n" +
 
     "━━━━━━━━━━━━━━━━━━\n" +
     "<a:DownArrow:1423890160667332690> **Please select a category from the dropdown menu below**"
@@ -156,3 +156,4 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
