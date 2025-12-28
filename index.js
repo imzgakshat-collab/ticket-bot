@@ -1,46 +1,3 @@
-require("dotenv").config();
-const express = require("express");
-const app = express();
-
-const {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  EmbedBuilder,
-  ActionRowBuilder,
-  StringSelectMenuBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  PermissionsBitField,
-  ChannelType,
-} = require("discord.js");
-
-/* -------- EXPRESS (FOR RENDER FREE) -------- */
-const PORT = process.env.PORT || 3000;
-app.get("/", (req, res) => res.send("Bot is running"));
-app.listen(PORT, () => console.log(`🌐 Web server running on ${PORT}`));
-
-/* -------- CATEGORY IDS -------- */
-const CATEGORY_IDS = {
-  purchase: "1454812266959601715",
-  claim: "1454812462728740884",
-  support: "1454812630429728933",
-};
-
-const OWNER_ID = "1140247742451556485";
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-  ],
-  partials: [Partials.Channel],
-});
-
-client.once("ready", () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-});
-
 /* -------- INTERACTIONS -------- */
 client.on("interactionCreate", async (interaction) => {
   try {
@@ -61,15 +18,15 @@ client.on("interactionCreate", async (interaction) => {
           "Welcome to our **Support Ticket System**.\n\n" +
           "━━━━━━━━━━━━━━━━━━\n" +
           "**<:purchase:1454767621823270946> Purchasing**\n" +
-          "- Buy products, ask pricing, or get purchasing help.\n\n" +
+          "- Use this category if you want to **buy something**, ask about **pricing**, or need help **before purchasing**.\n\n" +
           "━━━━━━━━━━━━━━━━━━\n" +
           "**<a:claiming:1454767248576090203> Claiming**\n" +
-          "- Claim giveaway or event rewards.\n\n" +
+          "- Use this category if you **won a giveaway or event** and want to **claim your prize**.\n\n" +
           "━━━━━━━━━━━━━━━━━━\n" +
           "**<a:CustomerSupport:1454767471402684478> Support**\n" +
-          "- Ask questions or get help.\n\n" +
+          "- Use this category if you have **questions**, **doubts**, or need help with **features or services**.\n\n" +
           "━━━━━━━━━━━━━━━━━━\n" +
-          "<a:DownArrow:1423890160667332690> **Select a category below**"
+          "<a:DownArrow:1423890160667332690> **Please select a category from the dropdown menu below**"
         )
         .setFooter({ text: "Our team will assist you as soon as possible" });
 
@@ -149,19 +106,18 @@ client.on("interactionCreate", async (interaction) => {
           .setStyle(ButtonStyle.Secondary)
       );
 
-      await interaction.reply({
-        content: "⚠️ Are you sure you want to close this ticket?",
+      await interaction.channel.send({
+        content: `⚠️ **${interaction.user} wants to close this ticket.**\nAre you sure?`,
         components: [confirmRow],
-        ephemeral: true,
       });
+
+      await interaction.deferUpdate();
     }
 
     /* ===== CONFIRM CLOSE ===== */
     if (interaction.isButton() && interaction.customId === "confirm_close") {
-      await interaction.reply({
-        content: "🔒 Ticket will be closed in 5 seconds...",
-        ephemeral: true,
-      });
+      await interaction.channel.send("🔒 **Ticket will be closed in 5 seconds...**");
+      await interaction.deferUpdate();
 
       setTimeout(() => {
         interaction.channel.delete().catch(() => {});
@@ -170,10 +126,8 @@ client.on("interactionCreate", async (interaction) => {
 
     /* ===== CANCEL CLOSE ===== */
     if (interaction.isButton() && interaction.customId === "cancel_close") {
-      await interaction.reply({
-        content: "❌ Ticket close cancelled.",
-        ephemeral: true,
-      });
+      await interaction.channel.send("❌ **Ticket close cancelled.**");
+      await interaction.deferUpdate();
     }
 
   } catch (err) {
