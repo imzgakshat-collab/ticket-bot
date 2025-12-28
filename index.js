@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 app.get("/", (req, res) => res.send("Bot is running"));
 app.listen(PORT, () => console.log(`🌐 Web server running on ${PORT}`));
 
-/* -------- CATEGORY IDS (REPLACE THESE) -------- */
+/* -------- CATEGORY IDS -------- */
 const CATEGORY_IDS = {
   purchase: "1454812266959601715",
   claim: "1454812462728740884",
@@ -55,29 +55,23 @@ client.on("interactionCreate", async (interaction) => {
       }
 
       const embed = new EmbedBuilder()
-  .setTitle("🎫 Ticket Support Panel")
-  .setColor(0x5865f2)
-  .setDescription(
-    "Welcome to our **Support Ticket System**.\n\n" +
-
-    "━━━━━━━━━━━━━━━━━━\n" +
-    "**<:purchase:1454767621823270946>  Purchasing**\n" +
-    "- Use this category if you want to **buy something**, ask about **pricing**, or need help **before purchasing**.\n\n" +
-
-    "━━━━━━━━━━━━━━━━━━\n" +
-    "**<a:claiming:1454767248576090203>  Claiming**\n" +
-    "- Use this category if you **won a giveaway or event** and want to **claim your prize**.\n\n" +
-
-    "━━━━━━━━━━━━━━━━━━\n" +
-    "**<a:CustomerSupport:1454767471402684478>  Support**\n" +
-    "- Use this category if you have **questions**, **doubts**, or need help with **features or services**.\n\n" +
-
-    "━━━━━━━━━━━━━━━━━━\n" +
-    "<a:DownArrow:1423890160667332690> **Please select a category from the dropdown menu below**"
-  )
-  .setFooter({
-    text: "Our team will assist you as soon as possible",
-  });
+        .setTitle("🎫 Ticket Support Panel")
+        .setColor(0x5865f2)
+        .setDescription(
+          "Welcome to our **Support Ticket System**.\n\n" +
+          "━━━━━━━━━━━━━━━━━━\n" +
+          "**<:purchase:1454767621823270946> Purchasing**\n" +
+          "- Buy products, ask pricing, or get purchasing help.\n\n" +
+          "━━━━━━━━━━━━━━━━━━\n" +
+          "**<a:claiming:1454767248576090203> Claiming**\n" +
+          "- Claim giveaway or event rewards.\n\n" +
+          "━━━━━━━━━━━━━━━━━━\n" +
+          "**<a:CustomerSupport:1454767471402684478> Support**\n" +
+          "- Ask questions or get help.\n\n" +
+          "━━━━━━━━━━━━━━━━━━\n" +
+          "<a:DownArrow:1423890160667332690> **Select a category below**"
+        )
+        .setFooter({ text: "Our team will assist you as soon as possible" });
 
       const menu = new StringSelectMenuBuilder()
         .setCustomId("ticket_menu")
@@ -104,7 +98,7 @@ client.on("interactionCreate", async (interaction) => {
       const channel = await guild.channels.create({
         name: `ticket-${interaction.user.username}`,
         type: ChannelType.GuildText,
-        parent: CATEGORY_IDS[type], // 👈 THIS IS THE KEY LINE
+        parent: CATEGORY_IDS[type],
         permissionOverwrites: [
           {
             id: guild.id,
@@ -142,12 +136,44 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-    /* ===== CLOSE BUTTON ===== */
+    /* ===== CLOSE TICKET (ASK CONFIRMATION) ===== */
     if (interaction.isButton() && interaction.customId === "close_ticket") {
-      await interaction.deferReply({ ephemeral: true });
-      await interaction.editReply("🔒 Closing ticket in 5 seconds...");
+      const confirmRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId("confirm_close")
+          .setLabel("Confirm Close")
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId("cancel_close")
+          .setLabel("Cancel")
+          .setStyle(ButtonStyle.Secondary)
+      );
 
-      setTimeout(() => interaction.channel.delete().catch(() => {}), 5000);
+      await interaction.reply({
+        content: "⚠️ Are you sure you want to close this ticket?",
+        components: [confirmRow],
+        ephemeral: true,
+      });
+    }
+
+    /* ===== CONFIRM CLOSE ===== */
+    if (interaction.isButton() && interaction.customId === "confirm_close") {
+      await interaction.reply({
+        content: "🔒 Ticket will be closed in 5 seconds...",
+        ephemeral: true,
+      });
+
+      setTimeout(() => {
+        interaction.channel.delete().catch(() => {});
+      }, 5000);
+    }
+
+    /* ===== CANCEL CLOSE ===== */
+    if (interaction.isButton() && interaction.customId === "cancel_close") {
+      await interaction.reply({
+        content: "❌ Ticket close cancelled.",
+        ephemeral: true,
+      });
     }
 
   } catch (err) {
@@ -156,4 +182,3 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
-
