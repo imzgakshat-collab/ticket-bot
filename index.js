@@ -11,8 +11,15 @@ const {
   ButtonStyle
 } = require("discord.js");
 
-/* 🔒 ONLY YOU CAN USE /ticket */
+/* 🔒 Only YOU can use /ticket */
 const OWNER_ID = "1140247742451556485";
+
+/* 🔹 SERVER EMOJIS */
+const EMOJIS = {
+  purchasing: "<:purchase:1454767621823270946>",
+  claiming: "<a:claiming:1454767248576090203>",
+  support: "<a:CustomerSupport:1454767471402684478>"
+};
 
 const client = new Client({
   intents: [
@@ -32,7 +39,6 @@ client.on("interactionCreate", async (interaction) => {
      ======================= */
   if (interaction.isChatInputCommand() && interaction.commandName === "ticket") {
 
-    // Only YOU can run /ticket
     if (interaction.user.id !== OWNER_ID) {
       return interaction.reply({
         content: "❌ You are not allowed to use this command.",
@@ -43,13 +49,15 @@ client.on("interactionCreate", async (interaction) => {
     const embed = new EmbedBuilder()
       .setTitle("🎫 Create a Ticket")
       .setDescription(
-        "**🛒 Purchasing**\n" +
+        `${EMOJIS.purchasing} **Purchasing**\n` +
         "Use this category if you want to buy something or need information before purchasing.\n\n" +
-        "**🎁 Claiming**\n" +
+
+        `${EMOJIS.claiming} **Claiming**\n` +
         "Use this category if you won a giveaway or event and want to claim your prize.\n\n" +
-        "**🛠 Support**\n" +
+
+        `${EMOJIS.support} **Support**\n` +
         "Use this category if you have questions, doubts, or need help with features or services.\n\n" +
-        "⬇️ **Select a category from the dropdown below to continue.**"
+        "⬇️ **Select a category from the dropdown below**"
       )
       .setColor(0x5865F2);
 
@@ -60,17 +68,17 @@ client.on("interactionCreate", async (interaction) => {
         {
           label: "Purchasing",
           value: "purchasing",
-          emoji: "🛒"
+          emoji: { id: "1454767621823270946" }
         },
         {
           label: "Claiming",
           value: "claiming",
-          emoji: "🎁"
+          emoji: { id: "1454767248576090203" }
         },
         {
           label: "Support",
           value: "support",
-          emoji: "🛠"
+          emoji: { id: "1454767471402684478" }
         }
       ]);
 
@@ -92,21 +100,27 @@ client.on("interactionCreate", async (interaction) => {
     const member = interaction.member;
 
     let ticketName = "";
-    let ticketMessage = "";
+    let ticketText = "";
 
     if (category === "purchasing") {
       ticketName = `purchase-${member.user.username}`;
-      ticketMessage = "🛒 **Purchasing Ticket**\nPlease tell us what you want to purchase.";
+      ticketText =
+        `${EMOJIS.purchasing} **Purchasing Ticket**\n` +
+        "Please tell us what you want to purchase.";
     }
 
     if (category === "claiming") {
       ticketName = `claim-${member.user.username}`;
-      ticketMessage = "🎁 **Claiming Ticket**\nPlease provide proof/details to claim your prize.";
+      ticketText =
+        `${EMOJIS.claiming} **Claiming Ticket**\n` +
+        "Please provide proof or details to claim your prize.";
     }
 
     if (category === "support") {
       ticketName = `support-${member.user.username}`;
-      ticketMessage = "🛠 **Support Ticket**\nPlease explain your issue or question.";
+      ticketText =
+        `${EMOJIS.support} **Support Ticket**\n` +
+        "Please explain your issue or question.";
     }
 
     const channel = await guild.channels.create({
@@ -140,7 +154,7 @@ client.on("interactionCreate", async (interaction) => {
       embeds: [
         new EmbedBuilder()
           .setTitle("🎫 Ticket Opened")
-          .setDescription(ticketMessage)
+          .setDescription(ticketText)
           .setColor(0x5865F2)
       ],
       components: [closeRow]
