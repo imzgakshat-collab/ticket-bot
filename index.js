@@ -7,78 +7,114 @@ const {
   ButtonStyle,
   EmbedBuilder,
   PermissionsBitField,
-  ChannelType
+  ChannelType,
 } = require("discord.js");
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers
-  ]
+    GatewayIntentBits.GuildMembers,
+  ],
 });
 
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-client.on("interactionCreate", async interaction => {
+client.on("interactionCreate", async (interaction) => {
 
+  /* =======================
+     SLASH COMMAND: /ticket
+     ======================= */
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === "ticket") {
 
       const embed = new EmbedBuilder()
         .setTitle("🎫 Create Ticket")
-        .setDescription("Click the button below to open a ticket.")
+        .setDescription("Click the button below to create a support ticket.")
         .setColor(0x5865F2);
 
-      const button = new ButtonBuilder()
+      const createButton = new ButtonBuilder()
         .setCustomId("create_ticket")
         .setLabel("Create Ticket")
         .setStyle(ButtonStyle.Primary);
 
-      const row = new ActionRowBuilder().addComponents(button);
+      const row = new ActionRowBuilder().addComponents(createButton);
 
       await interaction.reply({
         embeds: [embed],
-        components: [row]
+        components: [row],
+        ephemeral: true,
       });
     }
   }
 
-  if (interaction.isButton()) {
-    if (interaction.customId === "create_ticket") {
+  /* =======================
+     BUTTON: CREATE TICKET
+     ======================= */
+  if (interaction.isButton() && interaction.customId === "create_ticket") {
+    const guild = interaction.guild;
+    const member = interaction.member;
 
-      const guild = interaction.guild;
-      const member = interaction.member;
+    const channel = await guild.channels.create({
+      name: `ticket-${member.user.username}`,
+      type: ChannelType.GuildText,
+      permissionOverwrites: [
+        {
+          id: guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: member.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory,
+          ],
+        },
+      ],
+    });
 
-      const channel = await guild.channels.create({
-        name: `ticket-${member.user.username}`,
-        type: ChannelType.GuildText,
-        permissionOverwrites: [
-          {
-            id: guild.id,
-            deny: [PermissionsBitField.Flags.ViewChannel]
-          },
-          {
-            id: member.id,
-            allow: [
-              PermissionsBitField.Flags.ViewChannel,
-              PermissionsBitField.Flags.SendMessages,
-              PermissionsBitField.Flags.ReadMessageHistory
-            ]
-          }
-        ]
-      });
+    // Ticket message with CLOSE button
+    const ticketEmbed = new EmbedBuilder()
+      .setTitle("🎫 Support Ticket")
+      .setDescription(
+        "Please explain your issue below.\n\n" +
+        "🔒 Click **Close Ticket** when your issue is resolved."
+      )
+      .setColor(0x5865F2);
 
-      await channel.send(
-        `👋 Hello ${member}, please describe your issue.`
-      );
+    const closeButton = new ButtonBuilder()
+      .setCustomId("close_ticket")
+      .setLabel("🔒 Close Ticket")
+      .setStyle(ButtonStyle.Danger);
 
-      await interaction.reply({
-        content: `✅ Ticket created: ${channel}`,
-        ephemeral: true
-      });
-    }
+    const row = new ActionRowBuilder().addComponents(closeButton);
+
+    await channel.send({
+      embeds: [ticketEmbed],
+      components: [row],
+    });
+
+    await interaction.reply({
+      content: `✅ Ticket created: ${channel}`,
+      ephemeral: true,
+    });
+  }
+
+  /* =======================
+     BUTTON: CLOSE TICKET
+     ======================= */
+  if (interaction.isButton() && interaction.customId === "close_ticket") {
+
+    await interaction.reply({
+      content: "🔒 Closing this ticket in **5 seconds**...",
+      ephemeral: true,
+    });
+
+    setTimeout(() => {
+      interaction.channel.delete().catch(() => {});
+    }, 5000);
   }
 });
 
