@@ -55,14 +55,29 @@ client.on("interactionCreate", async (interaction) => {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle("🎫 Create a Ticket")
-        .setColor(0x5865f2)
-        .setDescription(
-          "**<:purchase:1454767621823270946> Purchasing**\nBuy products or services\n\n" +
-          "**<a:claiming:1454767248576090203> Claiming**\nClaim giveaway prizes\n\n" +
-          "**<a:CustomerSupport:1454767471402684478> Support**\nAsk questions or get help\n\n" +
-          "<a:DownArrow:1423890160667332690> **Select a category below**"
-        );
+  .setTitle("🎫 Ticket Support Panel")
+  .setColor(0x5865f2)
+  .setDescription(
+    "Welcome to our **Support Ticket System**.\n\n" +
+
+    "━━━━━━━━━━━━━━━━━━\n" +
+    "**<:purchase:1454767621823270946>  Purchasing**\n" +
+    "🟢 Use this category if you want to **buy something**, ask about **pricing**, or need help **before purchasing**.\n\n" +
+
+    "━━━━━━━━━━━━━━━━━━\n" +
+    "**<a:claiming:1454767248576090203>  Claiming**\n" +
+    "🟡 Use this category if you **won a giveaway or event** and want to **claim your prize**.\n\n" +
+
+    "━━━━━━━━━━━━━━━━━━\n" +
+    "**<a:CustomerSupport:1454767471402684478>  Support**\n" +
+    "🔵 Use this category if you have **questions**, **doubts**, or need help with **features or services**.\n\n" +
+
+    "━━━━━━━━━━━━━━━━━━\n" +
+    "<a:DownArrow:1423890160667332690> **Please select a category from the dropdown menu below**"
+  )
+  .setFooter({
+    text: "Our team will assist you as soon as possible",
+  });
 
       const menu = new StringSelectMenuBuilder()
         .setCustomId("ticket_menu")
