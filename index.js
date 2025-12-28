@@ -1,3 +1,4 @@
+require("dotenv").config();
 const {
   Client,
   GatewayIntentBits,
@@ -5,126 +6,125 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
   StringSelectMenuBuilder,
+  PermissionsBitField,
   ChannelType,
-  PermissionsBitField
 } = require("discord.js");
-
-require("dotenv").config();
-
-const OWNER_ID = "1140247742451556485"; // YOUR USER ID
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
   ],
-  partials: [Partials.Channel]
+  partials: [Partials.Channel],
 });
+
+const OWNER_ID = "1140247742451556485";
 
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-/* ---------------- SLASH COMMAND HANDLER ---------------- */
+/* ================= SLASH COMMAND ================= */
+
 client.on("interactionCreate", async (interaction) => {
   try {
-    /* ===== SLASH COMMAND: /ticketpanel ===== */
-    if (interaction.isChatInputCommand()) {
-      if (interaction.commandName === "ticketpanel") {
-        if (interaction.user.id !== OWNER_ID) {
-          return interaction.reply({
-            content: "❌ You are not allowed to use this command.",
-            ephemeral: true
-          });
-        }
-
-        const embed = new EmbedBuilder()
-          .setColor(0x5865f2)
-          .setTitle("<a:DownArrow:1423890160667332690> Select a category from the dropdown below")
-          .setDescription(
-            "**<:purchase:1454767621823270946> Purchasing**\nBuy products or services\n\n" +
-            "**<a:claiming:1454767248576090203> Claiming**\nClaim giveaway or event rewards\n\n" +
-            "**<a:CustomerSupport:1454767471402684478> Support**\nAsk questions or get help"
-          );
-
-        const menu = new StringSelectMenuBuilder()
-          .setCustomId("ticket_select")
-          .setPlaceholder("Choose a ticket category")
-          .addOptions([
-            {
-              label: "Purchasing",
-              value: "purchase",
-              emoji: "<:purchase:1454767621823270946>"
-            },
-            {
-              label: "Claiming",
-              value: "claim",
-              emoji: "<a:claiming:1454767248576090203>"
-            },
-            {
-              label: "Support",
-              value: "support",
-              emoji: "<a:CustomerSupport:1454767471402684478>"
-            }
-          ]);
-
-        const row = new ActionRowBuilder().addComponents(menu);
-
-        await interaction.reply({
-          embeds: [embed],
-          components: [row]
+    /* ---------- /ticket command ---------- */
+    if (interaction.isChatInputCommand() && interaction.commandName === "ticket") {
+      if (interaction.user.id !== OWNER_ID) {
+        return interaction.reply({
+          content: "❌ You are not allowed to use this command.",
+          ephemeral: true,
         });
       }
+
+      const embed = new EmbedBuilder()
+        .setTitle("🎫 Create a Ticket")
+        .setColor(0x5865f2)
+        .setDescription(
+          "**<:purchase:1454767621823270946> Purchasing**\n" +
+            "Use this category if you want to buy something or need info before purchasing.\n\n" +
+            "**<a:claiming:1454767248576090203> Claiming**\n" +
+            "Use this category if you won a giveaway or event and want to claim your prize.\n\n" +
+            "**<a:CustomerSupport:1454767471402684478> Support**\n" +
+            "Use this category if you have questions, doubts, or need help.\n\n" +
+            "<a:DownArrow:1423890160667332690> **Select a category from the dropdown below**"
+        );
+
+      const menu = new StringSelectMenuBuilder()
+        .setCustomId("ticket_menu")
+        .setPlaceholder("Select a ticket category")
+        .addOptions([
+          {
+            label: "Purchasing",
+            value: "purchase",
+            emoji: "<:purchase:1454767621823270946>",
+          },
+          {
+            label: "Claiming",
+            value: "claim",
+            emoji: "<a:claiming:1454767248576090203>",
+          },
+          {
+            label: "Support",
+            value: "support",
+            emoji: "<a:CustomerSupport:1454767471402684478>",
+          },
+        ]);
+
+      const row = new ActionRowBuilder().addComponents(menu);
+
+      await interaction.reply({
+        embeds: [embed],
+        components: [row],
+      });
     }
 
-    /* ===== DROPDOWN HANDLER ===== */
-    if (interaction.isStringSelectMenu()) {
-      if (interaction.customId !== "ticket_select") return;
-
-      // 🔴 IMPORTANT FIX (prevents Unknown interaction)
+    /* ---------- Dropdown handler ---------- */
+    if (interaction.isStringSelectMenu() && interaction.customId === "ticket_menu") {
+      // IMPORTANT: ACKNOWLEDGE IMMEDIATELY
       await interaction.deferReply({ ephemeral: true });
 
-      const type = interaction.values[0];
+      const category = interaction.values[0];
       const guild = interaction.guild;
-      const member = interaction.member;
 
       const channel = await guild.channels.create({
-        name: `ticket-${member.user.username}`,
+        name: `ticket-${interaction.user.username}`,
         type: ChannelType.GuildText,
         permissionOverwrites: [
           {
             id: guild.id,
-            deny: [PermissionsBitField.Flags.ViewChannel]
+            deny: [PermissionsBitField.Flags.ViewChannel],
           },
           {
-            id: member.id,
+            id: interaction.user.id,
             allow: [
               PermissionsBitField.Flags.ViewChannel,
               PermissionsBitField.Flags.SendMessages,
-              PermissionsBitField.Flags.ReadMessageHistory
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       });
 
       const ticketEmbed = new EmbedBuilder()
-        .setColor(0x2b2d31)
         .setTitle("🎫 Ticket Created")
         .setDescription(
-          `**User:** ${member}\n**Category:** ${type}\n\nPlease wait for staff response.`
-        );
+          `Category: **${category}**\n\nPlease describe your issue clearly.`
+        )
+        .setColor(0x57f287);
 
       await channel.send({ embeds: [ticketEmbed] });
 
       await interaction.editReply({
-        content: `✅ Your ticket has been created: ${channel}`
+        content: `✅ Your ticket has been created: ${channel}`,
       });
     }
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERROR:", err);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.editReply({ content: "❌ Something went wrong." });
+    }
   }
 });
 
-/* ---------------- LOGIN ---------------- */
 client.login(process.env.TOKEN);
