@@ -6,6 +6,8 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
   StringSelectMenuBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   PermissionsBitField,
   ChannelType,
 } = require("discord.js");
@@ -21,12 +23,12 @@ const client = new Client({
 
 const OWNER_ID = "1140247742451556485";
 
+/* ================= READY ================= */
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-/* ================= SLASH COMMAND ================= */
-
+/* ================= INTERACTIONS ================= */
 client.on("interactionCreate", async (interaction) => {
   try {
     /* ---------- /ticket command ---------- */
@@ -47,7 +49,7 @@ client.on("interactionCreate", async (interaction) => {
             "**<a:claiming:1454767248576090203> Claiming**\n" +
             "Use this category if you won a giveaway or event and want to claim your prize.\n\n" +
             "**<a:CustomerSupport:1454767471402684478> Support**\n" +
-            "Use this category if you have questions, doubts, or need help.\n\n" +
+            "Use this category if you have questions or need help.\n\n" +
             "<a:DownArrow:1423890160667332690> **Select a category from the dropdown below**"
         );
 
@@ -72,17 +74,14 @@ client.on("interactionCreate", async (interaction) => {
           },
         ]);
 
-      const row = new ActionRowBuilder().addComponents(menu);
-
       await interaction.reply({
         embeds: [embed],
-        components: [row],
+        components: [new ActionRowBuilder().addComponents(menu)],
       });
     }
 
-    /* ---------- Dropdown handler ---------- */
+    /* ---------- Dropdown ---------- */
     if (interaction.isStringSelectMenu() && interaction.customId === "ticket_menu") {
-      // IMPORTANT: ACKNOWLEDGE IMMEDIATELY
       await interaction.deferReply({ ephemeral: true });
 
       const category = interaction.values[0];
@@ -107,24 +106,47 @@ client.on("interactionCreate", async (interaction) => {
       });
 
       const ticketEmbed = new EmbedBuilder()
-        .setTitle("🎫 Ticket Created")
+        .setTitle("🎟 Ticket Opened")
         .setDescription(
-          `Category: **${category}**\n\nPlease describe your issue clearly.`
+          `**Category:** ${category}\n\nPlease explain your issue clearly.`
         )
         .setColor(0x57f287);
 
-      await channel.send({ embeds: [ticketEmbed] });
+      const closeButton = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId("close_ticket")
+          .setLabel("Close Ticket")
+          .setStyle(ButtonStyle.Danger)
+      );
+
+      await channel.send({
+        embeds: [ticketEmbed],
+        components: [closeButton],
+      });
 
       await interaction.editReply({
         content: `✅ Your ticket has been created: ${channel}`,
       });
     }
+
+    /* ---------- Close Ticket Button ---------- */
+    if (interaction.isButton() && interaction.customId === "close_ticket") {
+      await interaction.deferReply({ ephemeral: true });
+
+      await interaction.editReply("🛑 Closing ticket in 5 seconds...");
+
+      setTimeout(async () => {
+        try {
+          await interaction.channel.delete();
+        } catch (err) {
+          console.error(err);
+        }
+      }, 5000);
+    }
   } catch (err) {
     console.error("❌ ERROR:", err);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.editReply({ content: "❌ Something went wrong." });
-    }
   }
 });
 
+/* ================= LOGIN ================= */
 client.login(process.env.TOKEN);
