@@ -57,7 +57,7 @@ client.on("interactionCreate", async (interaction) => {
 
         `${EMOJIS.support} **Support**\n` +
         "Use this category if you have questions, doubts, or need help with features or services.\n\n" +
-        "<a:DownArrow:14238h90160667332690> **Select a category from the dropdown below**"
+        "<a:DownArrow:1423890160667332690> **Select a category from the dropdown below**"
       )
       .setColor(0x5865F2);
 
@@ -182,4 +182,5 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
 
