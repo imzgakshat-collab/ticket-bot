@@ -65,21 +65,21 @@ client.on("interactionCreate", async (interaction) => {
           "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
           "**<:purchase:1454767621823270946>  PURCHASING**\n" +
           "Use this option if you want to:\n" +
-          "• Buy any product or service\n" +
-          "• Ask pricing & payment details\n" +
-          "• Get help *before purchasing*\n\n" +
+          "• **Buy any product or service**\n" +
+          "• **Ask pricing & payment details**\n" +
+          "• **Get help before purchasing**\n\n" +
 
           "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
           "**<a:claiming:1454767248576090203>  CLAIMING**\n" +
           "Use this option if you:\n" +
-          "• Won a giveaway or event\n" +
-          "• Need to claim your reward\n\n" +
+          "• **Won a giveaway or event**\n" +
+          "• **Need to claim your reward**\n\n" +
 
           "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
           "**<a:CustomerSupport:1454767471402684478>  SUPPORT**\n" +
           "Use this option if you:\n" +
-          "• Have questions or doubts\n" +
-          "• Need help with features or services\n\n" +
+          "• **Have questions or doubts**\n" +
+          "• **Need help with features or services**\n\n" +
 
           "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
           "<a:DownArrow:1423890160667332690> **Select a ticket category from the dropdown below**"
@@ -216,3 +216,4 @@ client.on("interactionCreate", async (interaction) => {
 
 /* ================= LOGIN ================= */
 client.login(process.env.TOKEN);
+
