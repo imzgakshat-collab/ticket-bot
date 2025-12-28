@@ -10,6 +10,9 @@ const {
   ChannelType,
 } = require("discord.js");
 
+/* 🔒 YOUR USER ID */
+const OWNER_ID = "1140247742451556485";
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -29,6 +32,14 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === "ticket") {
 
+      /* 🔒 Only YOU can use /ticket */
+      if (interaction.user.id !== OWNER_ID) {
+        return interaction.reply({
+          content: "❌ You are not allowed to use this command.",
+          ephemeral: true,
+        });
+      }
+
       const embed = new EmbedBuilder()
         .setTitle("🎫 Create Ticket")
         .setDescription("Click the button below to create a support ticket.")
@@ -41,10 +52,10 @@ client.on("interactionCreate", async (interaction) => {
 
       const row = new ActionRowBuilder().addComponents(createButton);
 
+      /* 👀 Visible to everyone */
       await interaction.reply({
         embeds: [embed],
         components: [row],
-        ephemeral: true,
       });
     }
   }
@@ -75,7 +86,6 @@ client.on("interactionCreate", async (interaction) => {
       ],
     });
 
-    // Ticket message with CLOSE button
     const ticketEmbed = new EmbedBuilder()
       .setTitle("🎫 Support Ticket")
       .setDescription(
@@ -106,7 +116,6 @@ client.on("interactionCreate", async (interaction) => {
      BUTTON: CLOSE TICKET
      ======================= */
   if (interaction.isButton() && interaction.customId === "close_ticket") {
-
     await interaction.reply({
       content: "🔒 Closing this ticket in **5 seconds**...",
       ephemeral: true,
